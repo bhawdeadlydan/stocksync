@@ -45,12 +45,12 @@ func (sih *StockInfoHandler) CreateStockInfo(resp http.ResponseWriter, req *http
 
 func (sih *StockInfoHandler) GetStockInfo(resp http.ResponseWriter, req *http.Request) error {
 	ctx := context.Background()
-	fsymKeys, ok := req.URL.Query()["fsym"]
+	fsymKeys, ok := req.URL.Query()["fsyms"]
 	if !ok || len(fsymKeys[0]) < 1 {
 		return fmt.Errorf("Url Param 'fsym' is missing")
 	}
 
-	tsymKeys, ok := req.URL.Query()["tsym"]
+	tsymKeys, ok := req.URL.Query()["tsyms"]
 	if !ok || len(tsymKeys[0]) < 1 {
 		return fmt.Errorf("Url Param 'tsym' is missing")
 	}
@@ -60,11 +60,11 @@ func (sih *StockInfoHandler) GetStockInfo(resp http.ResponseWriter, req *http.Re
 		Tsyms: tsymKeys,
 	}
 
-	stockInfos, err := sih.svc.GetStocksFor(ctx, stockQuery)
+	stockResponses, err := sih.svc.GetStocksFor(ctx, stockQuery)
 	if err != nil {
 		return fmt.Errorf("error occurred while fetching stock Infos: %v", err)
 	}
-
-	utils.WriteSuccessResponse(resp, http.StatusOK, stockInfos)
+	sf := &contract.StockFormatter{stockResponses}
+	utils.WriteSuccessResponse(resp, http.StatusOK, sf.FormatStockInfoResponse())
 	return nil
 }
