@@ -24,6 +24,9 @@
 
 `make app`
 
+5. Inspect logs using docker 
+
+`docker logs stock-service-go -f`
 
 ## Verifying the Functionality
 
