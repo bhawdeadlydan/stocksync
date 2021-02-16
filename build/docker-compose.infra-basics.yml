@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../pkg/repository/migrations/:/docker-entrypoint-initdb.d/
+    environment:
+      MYSQL_USER: stock_user_go
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: stock_db_go
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - stocknetwork
