@@ -11,7 +11,8 @@ require (
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
-	go.opentelemetry.io/otel v0.16.0
+	github.com/tidwall/gjson v1.6.8
+	go.opentelemetry.io/otel v0.16.0 // indirect
 	go.uber.org/zap v1.16.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gorm.io/driver/mysql v1.0.4

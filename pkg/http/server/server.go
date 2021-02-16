@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"stocksync/pkg/background/handler"
 	"stocksync/pkg/config"
 	"syscall"
 	"time"
@@ -17,10 +18,10 @@ type Server interface {
 }
 
 type appServer struct {
-	cfg         config.Config
-	lgr         *zap.Logger
-	router      http.Handler
-	tracerFlush func()
+	cfg    config.Config
+	lgr    *zap.Logger
+	router http.Handler
+	bgh    *handler.StockInfoBackgroundHandler
 }
 
 func (s *appServer) Start() {
@@ -28,14 +29,34 @@ func (s *appServer) Start() {
 
 	s.lgr.Sugar().Infof("listening on %s", s.cfg.GetHTTPServerConfig().GetAddress())
 	go func() { _ = server.ListenAndServe() }()
+	done := make(chan bool)
+	go s.startDataRefresher(done)()
 
-	waitForShutdown(server, s.lgr, s.tracerFlush)
+	waitForShutdown(server, s.lgr, done)
 }
 
-func waitForShutdown(server *http.Server, lgr *zap.Logger, tracerFlush func()) {
+func (s *appServer) startDataRefresher(done chan bool) func() {
+	return func() {
+		tickerDuration := time.Duration(s.cfg.GetDataRefresherConfig().GetTickerIntervalInSec())
+		ticker := time.NewTicker(tickerDuration * time.Second)
+
+		for {
+			select {
+			case <-done:
+				return
+			case t := <-ticker.C:
+				s.lgr.Sugar().Infof("Refreshing Data...", t)
+				_ = s.bgh.UpdateStockInfo()
+			}
+		}
+	}
+}
+
+func waitForShutdown(server *http.Server, lgr *zap.Logger, done chan bool) {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-sigCh
+	done <- true
 
 	defer func() { _ = lgr.Sync() }()
 
@@ -45,7 +66,6 @@ func waitForShutdown(server *http.Server, lgr *zap.Logger, tracerFlush func()) {
 		return
 	}
 
-	tracerFlush()
 	lgr.Info("server shutdown successful")
 }
 
@@ -58,10 +78,11 @@ func newHTTPServer(cfg config.HTTPServerConfig, handler http.Handler) *http.Serv
 	}
 }
 
-func NewServer(cfg config.Config, lgr *zap.Logger, router http.Handler) Server {
+func NewServer(cfg config.Config, lgr *zap.Logger, router http.Handler, bgh *handler.StockInfoBackgroundHandler) Server {
 	return &appServer{
-		cfg:         cfg,
-		lgr:         lgr,
-		router:      router,
+		cfg:    cfg,
+		lgr:    lgr,
+		router: router,
+		bgh:    bgh,
 	}
 }

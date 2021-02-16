@@ -39,8 +39,7 @@ func (gbr *gormStockRepository) CreateOrUpdateStockEntry(ctx context.Context, st
 				"mkt_cap",
 				"updated_at",
 			}),
-		}).
-		Create(&stockInfo)
+		}).Create(&stockInfo)
 	if db.Error != nil {
 		return fmt.Errorf("create stock entry failed. error %w", db.Error)
 	}

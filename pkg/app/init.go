@@ -5,13 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"stocksync/pkg/background/handler"
+	"stocksync/pkg/client"
 	"stocksync/pkg/config"
 	"stocksync/pkg/http/router"
 	"stocksync/pkg/http/server"
 	"stocksync/pkg/reporters"
 	"stocksync/pkg/repository"
 	"stocksync/pkg/stockinfo"
-
 	"go.uber.org/zap"
 )
 
@@ -19,8 +20,9 @@ func initHTTPServer(configFile string) {
 	config := config.NewConfig(configFile)
 	logger := initLogger(config)
 	rt := initRouter(config, logger)
+	bgh := initBackgroundHandler(config, logger)
 
-	server.NewServer(config, logger, rt).Start()
+	server.NewServer(config, logger, rt, bgh).Start()
 }
 
 func initRouter(cfg config.Config, logger *zap.Logger) http.Handler {
@@ -36,8 +38,15 @@ func initService(stockInfoRepository repository.StockRepository) stockinfo.Servi
 	return stockInfoService
 }
 
+func initBackgroundHandler(cfg config.Config, logger *zap.Logger) *handler.StockInfoBackgroundHandler {
+	stockPriceRepo := initRepository(cfg)
+	stockInfoService := initService(stockPriceRepo)
+	stockClient := initClient(cfg.GetClientConfig())
 
-func initRepository(cfg config.Config) (repository.StockRepository) {
+	return handler.NewStockInfoBackgroundHandler(logger, stockInfoService, stockClient, cfg.GetDataRefresherConfig())
+}
+
+func initRepository(cfg config.Config) repository.StockRepository {
 	dbConfig := cfg.GetDBConfig()
 	dbHandler := repository.NewDBHandler(dbConfig)
 
@@ -61,4 +70,12 @@ func getWriters(cfg config.LogFileConfig) []io.Writer {
 		os.Stdout,
 		reporters.NewExternalLogFile(cfg),
 	}
+}
+
+func initClient(cfg config.ClientConfig) *client.StockClient {
+	hc := client.NewHTTPClient(cfg.GetTimeout())
+
+	stockClient := client.NewStockClient(hc, cfg.GetStockClientBaseURL())
+
+	return stockClient
 }

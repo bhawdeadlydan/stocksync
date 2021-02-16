@@ -1,16 +1,18 @@
 package config
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
+	"log"
 )
 
 type Config struct {
-	dbConfig         DBConfig
-	logConfig        LogConfig
-	logFileConfig    LogFileConfig
-	httpServerConfig HTTPServerConfig
+	dbConfig            DBConfig
+	logConfig           LogConfig
+	logFileConfig       LogFileConfig
+	httpServerConfig    HTTPServerConfig
+	tickerIntervalInSec int
+	clientConfig        ClientConfig
+	dataRefresherConfig DataRefresherConfig
 }
 
 func (config Config) GetDBConfig() DBConfig {
@@ -29,6 +31,14 @@ func (config Config) GetLogFileConfig() LogFileConfig {
 	return config.logFileConfig
 }
 
+func (config Config) GetDataRefresherConfig() DataRefresherConfig {
+	return config.dataRefresherConfig
+}
+
+func (config Config) GetClientConfig() ClientConfig {
+	return config.clientConfig
+}
+
 func NewConfig(configFile string) Config {
 	viper.AutomaticEnv()
 
@@ -40,9 +50,11 @@ func NewConfig(configFile string) Config {
 	}
 
 	return Config{
-		dbConfig:         newDBConfig(),
-		logConfig:        newLogConfig(),
-		logFileConfig:    newLogFileConfig(),
-		httpServerConfig: newHTTPServerConfig(),
+		dbConfig:            newDBConfig(),
+		logConfig:           newLogConfig(),
+		logFileConfig:       newLogFileConfig(),
+		httpServerConfig:    newHTTPServerConfig(),
+		clientConfig:        newClientConfig(),
+		dataRefresherConfig: newDataRefresherConfig(),
 	}
 }
