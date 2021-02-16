@@ -31,7 +31,8 @@
 ## Verifying the Functionality
 
 Create Stocks Request
-```
+```shell script
+
 curl -X POST \
   http://localhost:8888/stock \
   -H 'cache-control: no-cache' \
@@ -50,6 +51,12 @@ curl -X POST \
 "SUPPLY": "18313937",
 "MKTCAP": "133432964170.19"
 }'
+```
+
+GET STOCKS Req
+```shell script
+curl -X GET \
+  'http://localhost:8888/stock?fsyms=BTC&tsyms=USD' \
 ```
 
 
