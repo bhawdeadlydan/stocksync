@@ -9,8 +9,10 @@ type StockInfo struct {
 	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid()" json:"id"`
 	CreatedAt       time.Time `gorm:"column:created_at;default:now()" json:"created_at"`
 	UpdatedAt       time.Time `gorm:"column:updated_at;default:now()" json:"updated_at"`
-	Fsym            string	  `gorm:"column:fsym;primaryKey" json:"fsym"`
-	Tsym            string	  `gorm:"column:tsym;primaryKey" json:"tsym"`
+	Fsym            string    `gorm:"column:fsym;primaryKey" json:"fsym"`
+	Tsym            string    `gorm:"column:tsym;primaryKey" json:"tsym"`
+	DisplayFsym     string    `gorm:"column:display_fsym;" json:"display_fsym"`
+	DisplayTsym     string    `gorm:"column:display_tsym;" json:"display_tsym"`
 	Change24Hour    string    `gorm:"column:change_24_hour" json:"CHANGE24HOUR"`
 	ChangePct24Hour string    `gorm:"column:change_pct_24_hour" json:"CHANGEPCT24HOUR"`
 	Open24Hour      string    `gorm:"column:open24_hour" json:"OPEN24HOUR"`
@@ -26,5 +28,3 @@ type StockInfo struct {
 func (StockInfo) TableName() string {
 	return "stock_info"
 }
-
-

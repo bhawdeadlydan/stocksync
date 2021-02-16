@@ -18,10 +18,12 @@ type StockPrice struct {
 	MKTCAP          float64
 }
 
-func (cdf *StockPrice) ToStockInfo(fsym string, tsym string) *model.StockInfo {
+func (cdf *StockPrice) ToStockInfo(fsym string, tsym string, displayFsym string, displayTsym string) *model.StockInfo {
 	stockInfo := &model.StockInfo{
 		Fsym:            fsym,
 		Tsym:            tsym,
+		DisplayFsym:     displayFsym,
+		DisplayTsym:     displayTsym,
 		Change24Hour:    fmt.Sprintf("%f", cdf.CHANGE24HOUR),
 		ChangePct24Hour: fmt.Sprintf("%f", cdf.CHANGEPCT24HOUR),
 		Open24Hour:      fmt.Sprintf("%f", cdf.OPEN24HOUR),
