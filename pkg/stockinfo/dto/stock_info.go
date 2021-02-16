@@ -1,6 +1,9 @@
 package dto
 
-import "stocksync/pkg/stockinfo/model"
+import (
+	"stocksync/pkg/stockinfo/model"
+	"strconv"
+)
 
 type StockQuery struct {
 	Fsyms []string
@@ -16,7 +19,7 @@ type RawStockInfo struct {
 	LOW24HOUR       float64 `json:"LOW24HOUR"`
 	HIGH24HOUR      float64 `json:"HIGH24HOUR"`
 	PRICE           float64 `json:"PRICE"`
-	LASTUPDATE      int     `json:"LASTUPDATE"`
+	LASTUPDATE      string     `json:"LASTUPDATE"`
 	SUPPLY          int     `json:"SUPPLY"`
 	MKTCAP          float64 `json:"MKTCAP"`
 }
@@ -37,13 +40,52 @@ type DisplayStockInfo struct {
 }
 
 type StockResponse struct {
-	RawStockInfo RawStockInfo
+	RawStockInfo     RawStockInfo
 	DisplayStockInfo DisplayStockInfo
-	FromSymbol string
-	ToSymbol string
+	FromSymbol       string
+	ToSymbol         string
 }
 
 // mapping and formatting happens here
 func NewStockResponse(stockInfo model.StockInfo) *StockResponse {
-	return &StockResponse{}
+	return &StockResponse{
+		RawStockInfo: RawStockInfo{
+			CHANGE24HOUR: parseFloat(stockInfo.Change24Hour),
+			CHANGEPCT24HOUR: parseFloat(stockInfo.ChangePct24Hour),
+			OPEN24HOUR: parseFloat(stockInfo.Open24Hour),
+			VOLUME24HOUR: parseFloat(stockInfo.Volume24Hour),
+			VOLUME24HOURTO: parseFloat(stockInfo.Volume24Hourto),
+			LOW24HOUR: parseFloat(stockInfo.Low24Hour),
+			HIGH24HOUR: parseFloat(stockInfo.High24Hour),
+			PRICE: parseFloat(stockInfo.Price),
+			LASTUPDATE: "",
+			SUPPLY: parseInt(stockInfo.Supply),
+			MKTCAP: parseFloat(stockInfo.MktCap),
+		},
+		DisplayStockInfo: DisplayStockInfo{
+			CHANGE24HOUR: stockInfo.Change24Hour,
+			CHANGEPCT24HOUR: stockInfo.ChangePct24Hour,
+			OPEN24HOUR: stockInfo.Open24Hour,
+			VOLUME24HOUR: stockInfo.Volume24Hour,
+			VOLUME24HOURTO: stockInfo.Volume24Hourto,
+			HIGH24HOUR: stockInfo.Low24Hour,
+			PRICE: stockInfo.High24Hour,
+			FROMSYMBOL: stockInfo.Fsym,
+			TOSYMBOL: stockInfo.Tsym,
+			LASTUPDATE: "",
+			SUPPLY: stockInfo.Supply,
+			MKTCAP: stockInfo.MktCap,
+		},
+		FromSymbol: stockInfo.Fsym,
+		ToSymbol:   stockInfo.Tsym,
+	}
+}
+
+func parseFloat(element string) float64 {
+	floatVal, _ := strconv.ParseFloat(element, 64)
+	return floatVal
+}
+func parseInt(element string) int {
+	intVal, _ := strconv.ParseInt(element, 10, 16)
+	return int(intVal)
 }

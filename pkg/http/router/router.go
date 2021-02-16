@@ -22,6 +22,7 @@ func NewRouter(lgr *zap.Logger, stockInfoService stockinfo.Service) http.Handler
 	sih := handler.NewStockInfoHandler(lgr, stockInfoService)
 
 	router.HandleFunc(stockInfoPath, withMiddlewares(lgr, middleware.WithErrorHandler(lgr, sih.CreateStockInfo))).Methods(http.MethodPost)
+	router.HandleFunc(stockInfoPath, withMiddlewares(lgr, middleware.WithErrorHandler(lgr, sih.GetStockInfo))).Methods(http.MethodGet)
 
 	return router
 }
