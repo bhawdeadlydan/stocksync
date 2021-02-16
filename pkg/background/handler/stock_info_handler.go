@@ -37,7 +37,7 @@ func (sih *StockInfoBackgroundHandler) UpdateStockInfo() error {
 			if err != nil {
 				return fmt.Errorf("StockInfoBackgroundHandler.GetStockPrice . error %v", err)
 			}
-			sih.lgr.Sugar().Infof("Received stock Info for fsym: %s, tsym: %s. StockInfo: %v", stockInfo)
+			sih.lgr.Sugar().Infof("Received stock Info for fsym: %s, tsym: %s. StockInfo: %v", fsym, tsym, stockInfo)
 
 			err = sih.svc.CreateOrUpdateStockInfo(ctx, stockInfo)
 			if err != nil {

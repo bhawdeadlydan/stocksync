@@ -7,6 +7,7 @@ import (
 	"stocksync/pkg/http/contract"
 	"stocksync/pkg/http/internal/utils"
 	"stocksync/pkg/stockinfo"
+	"stocksync/pkg/stockinfo/dto"
 	"stocksync/pkg/stockinfo/model"
 
 	"go.uber.org/zap"
@@ -39,5 +40,31 @@ func (sih *StockInfoHandler) CreateStockInfo(resp http.ResponseWriter, req *http
 
 	sih.lgr.Debug("msg", zap.String("eventCode", utils.StockInfoAdded))
 	utils.WriteSuccessResponse(resp, http.StatusCreated, contract.StockInfoCreationSuccess)
+	return nil
+}
+
+func (sih *StockInfoHandler) GetStockInfo(resp http.ResponseWriter, req *http.Request) error {
+	ctx := context.Background()
+	fsymKeys, ok := req.URL.Query()["fsym"]
+	if !ok || len(fsymKeys[0]) < 1 {
+		return fmt.Errorf("Url Param 'fsym' is missing")
+	}
+
+	tsymKeys, ok := req.URL.Query()["tsym"]
+	if !ok || len(tsymKeys[0]) < 1 {
+		return fmt.Errorf("Url Param 'tsym' is missing")
+	}
+
+	stockQuery := &dto.StockQuery{
+		Fsyms: fsymKeys,
+		Tsyms: tsymKeys,
+	}
+
+	stockInfos, err := sih.svc.GetStocksFor(ctx, stockQuery)
+	if err != nil {
+		return fmt.Errorf("error occurred while fetching stock Infos: %v", err)
+	}
+
+	utils.WriteSuccessResponse(resp, http.StatusOK, stockInfos)
 	return nil
 }

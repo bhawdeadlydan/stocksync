@@ -51,11 +51,18 @@ func (sc *StockClient) GetPriceData(ctx context.Context, fsym string, tsym strin
 		return nil, fmt.Errorf("priceDetails.Resp.Reading error: %v", err)
 	}
 
+
+	fmt.Println("----------------")
+	fmt.Println(string(data))
+	fmt.Println("----------------")
 	jsonData := gjson.Get(string(data), strings.Join([]string{"RAW", fsym, tsym}, "."))
 
 	stockInfoFormat := &contracts.StockPrice{}
 
-	err = json.Unmarshal([]byte(jsonData.String()), &stockInfoFormat)
+	fmt.Println("++++++++++++++++")
+	fmt.Println(jsonData.String())
+	fmt.Println("++++++++++++++++")
+	err = json.Unmarshal([]byte(jsonData.String()), stockInfoFormat)
 	if err != nil {
 		return nil, fmt.Errorf("priceDetails.Resp.Parsing error: %v", err)
 	}

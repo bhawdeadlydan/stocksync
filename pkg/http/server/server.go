@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -46,7 +47,10 @@ func (s *appServer) startDataRefresher(done chan bool) func() {
 				return
 			case t := <-ticker.C:
 				s.lgr.Sugar().Infof("Refreshing Data...", t)
-				_ = s.bgh.UpdateStockInfo()
+				err := s.bgh.UpdateStockInfo()
+				if err != nil {
+					s.lgr.Error(fmt.Sprintf("Error occurred while updating stock info: %v", err.Error()))
+				}
 			}
 		}
 	}
